@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Text, TouchableOpacity } from 'react-native'
 import Login from './components/Authentication/Login'
 import Testing from './R&D/Testing'
@@ -9,7 +9,7 @@ import { MenuProvider } from 'react-native-popup-menu'
 import PopUpMenu from './components/Utility/PopUpMenu'
 import DBManagement from './R&D/DBManagement'
 import FirstScreen from './components/Photos/FirstScreen'
-import { VariableProvider } from './components/context/VariableContext'
+import VariableContext, { VariableProvider } from './components/context/VariableContext'
 import ViewFullImage from './components/Photos/ViewFullImage'
 
 const Stack = createStackNavigator();
@@ -45,9 +45,11 @@ const navStyle = {
 
 function RightSideHeader() {
     const navigation = useNavigation();
+    const { performOfflineActions } = useContext(VariableContext);
+
     const menus = [
         { title: 'Select Folder', click: () => navigation.navigate('Select Folder') },
-        { title: 'Force Sync', click: () => { } },
+        { title: 'Force Sync', click: () => { performOfflineActions() } },
         { title: 'Login', click: () => navigation.navigate('Login') },
     ];
     return (

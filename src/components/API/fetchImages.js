@@ -22,14 +22,6 @@ export default async function fetchImages(token) {
 export async function fetchSomeImages(token, ids) {
     console.log('fetchSomeImages');
     try {
-        // const response = await axios.post(`${API_BASE_URL}/photu/get/`, { ids: [...ids] }, {
-        //     headers: {
-        //         'Authorization': `Token ${token}`,
-        //     }
-        // });
-        // if (response.status === 200) {
-        //     return response.data
-        // }
         const response = await fetch(`${API_BASE_URL}/photu/get/`, {
             method: 'POST',
             headers: {

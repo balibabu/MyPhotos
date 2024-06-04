@@ -33,5 +33,38 @@ export default function CodeDumper() {
         })
     }
 
+        async function setImages() {
+        let images = [];
+        for (let folder of folders) {
+            const files = await getFiles(folder.path);
+            images = [...images, ...files]
+        }
+        images.sort((a, b) => new Date(a.mtime) - new Date(b.mtime))
+        setLocalImgs(images);
+    }
+
+        async function performActions() {
+        await askForMediaPermission();
+        await createTable('Folder', { path: 'VARCHAR PRIMARY KEY', syncedUpto: 'VARCHAR' }); // syncedUpto is mtime of last file from sorted files acc. mtime
+        await createTable('Variables', { name: 'VARCHAR PRIMARY KEY', value: 'VARCHAR' });
+        // await createTable('LocalSynced', { title: 'VARCHAR', size: 'VARCHAR', PRIMARY: 'KEY (title, size)' });
+        await createTable('SyncedPhotos', { id: 'INTEGER PRIMARY KEY', title: 'VARCHAR', size: 'VARCHAR', height: 'INTEGER', width: 'INTEGER', uri: 'VARCHAR' });
+        await getFolders();
+        await getVariables();
+    }
+
+
+        async function syncingOps() {
+        if (variables.Token) {
+            const images = await getSyncedImages();
+            const unsyncedImages = await syncServerImages(images);
+            const tmp_syncedImgs = [...unsyncedImages, ...images];
+            setSyncedImgs(tmp_syncedImgs);
+            const localImgs = await getFoldersImages(folders);
+            await localImageSyncer(localImgs, variables.Token, tmp_syncedImgs, setSyncedImgs);
+            getSyncedImages() //from table
+        }
+    }
+
     
 */

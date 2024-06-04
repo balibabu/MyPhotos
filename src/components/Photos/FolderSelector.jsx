@@ -5,7 +5,7 @@ import CButton from '../Utility/CButton';
 import VariableContext from '../context/VariableContext';
 
 export default function FolderSelector() {
-    const { folders, setFolders, getFolders, addFolder, removeFolder } = useContext(VariableContext);
+    const { folders, addFolder, removeFolder } = useContext(VariableContext);
 
     async function onSelection() {
         try {

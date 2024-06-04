@@ -5,18 +5,20 @@ import { deleteRow, insertRow } from '../Utility/CDatabase';
 import { Confirmation } from '../Utility/Confirmation';
 import { login } from './authentication';
 import VariableContext from '../context/VariableContext';
+import WaitFor from '../Utility/Waiter';
 
 export default function Login({ navigation }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const { variables, getVariables } = useContext(VariableContext);
+    const { variables, getVariables, performOfflineActions } = useContext(VariableContext);
 
     async function loginHandler() {
         const token = await login(username, password);
         await deleteRow('Variables', "name='Token'");
         await insertRow('Variables', { name: 'Token', value: token });
-        getVariables()
+        await getVariables()
         setPassword('');
+        performOfflineActions();
     }
 
     async function logoutHandler() {
@@ -31,7 +33,8 @@ export default function Login({ navigation }) {
         return (
             <View style={styles.container} className='bg-gray-800 p-2'>
                 <Text className='text-sky-100 text-xl text-center font-bold'>You are already logged in</Text>
-                <CButton {...{ title: 'logout', onClick: logoutHandler, style: { text: 'bg-sky-900 p-2 m-2 rounded-md text-sky-100 text-xl text-center font-bold' } }} />
+                <Text className='text-sky-100 text-sm text-center'>clear the app data for logout</Text>
+                {/* <CButton {...{ title: 'logout', onClick: logoutHandler, style: { text: 'bg-sky-900 p-2 m-2 rounded-md text-sky-100 text-xl text-center font-bold' } }} /> */}
             </View>
         );
     }
