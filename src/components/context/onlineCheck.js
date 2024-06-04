@@ -15,7 +15,7 @@ export default async function isOnline(token) {
             return false;
         }
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         return false;
     }
 }

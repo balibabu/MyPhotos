@@ -18,8 +18,8 @@ export default function FolderSelector() {
     }
 
     return (
-        <View className='flex-1 bg-sky-800'>
-            {folders.length === 0 && <Text>No Folder selected</Text>}
+        <View className='flex-1 bg-gray-900'>
+            {folders.length === 0 && <Text className='p-2 text-sky-200 text-xl'>No Folder selected</Text>}
             <FlatList
                 data={folders}
                 renderItem={({ item }) => <CButton {...{ title: item.path, onClick: () => removeFolder(item.path), style: { text: 'font-semibold text-sky-200 text-xl' } }} />}
