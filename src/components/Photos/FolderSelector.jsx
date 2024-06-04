@@ -1,0 +1,37 @@
+import React, { useContext } from 'react'
+import { Button, FlatList, Text, View } from 'react-native'
+import { pickDirectory } from 'react-native-document-picker';
+import CButton from '../Utility/CButton';
+import VariableContext from '../context/VariableContext';
+
+export default function FolderSelector() {
+    const { folders, setFolders, getFolders, addFolder, removeFolder } = useContext(VariableContext);
+
+    async function onSelection() {
+        try {
+            const { uri } = await pickDirectory({ requestLongTermAccess: true });
+            const folderPath = getPathFromUri(uri);
+            addFolder(folderPath);
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    return (
+        <View className='flex-1 bg-sky-800'>
+            {folders.length === 0 && <Text>No Folder selected</Text>}
+            <FlatList
+                data={folders}
+                renderItem={({ item }) => <CButton {...{ title: item.path, onClick: () => removeFolder(item.path), style: { text: 'font-semibold text-sky-200 text-xl' } }} />}
+                keyExtractor={(item, index) => index}
+            />
+            <Button title='Select Folder' onPress={onSelection} />
+        </View>
+    )
+}
+
+function getPathFromUri(uri) {
+    const pathUri = uri.split('%3A')[1];
+    const path = pathUri.replaceAll('%2F', '/');
+    return '/' + decodeURI(path);
+}
