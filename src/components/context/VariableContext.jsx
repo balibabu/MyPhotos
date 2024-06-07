@@ -9,6 +9,8 @@ import { getFoldersImages, localImageSyncer } from "./folderImages";
 import { createTables } from "./createTables";
 import isOnline from "./onlineCheck";
 import WaitFor from "../Utility/Waiter";
+import RNFS from 'react-native-fs';
+import { deleteImg } from "../API/deleteImg";
 
 const VariableContext = createContext();
 export default VariableContext;
@@ -26,7 +28,7 @@ export const VariableProvider = ({ children }) => {
     async function performOfflineActions() {
         await askForMediaPermission();
         await createTables();
-        await getSyncedImages()
+        await getSyncedImages();
         await getVariables();
         if (instantVars.variables.Token && await isOnline(instantVars.variables.Token)) {
             setVariables((prev) => ({ ...prev, online: true }));
@@ -46,12 +48,7 @@ export const VariableProvider = ({ children }) => {
         await getFolders();
         await WaitFor(2000);
         const localImgs = await getFoldersImages(instantVars.folders);
-        const hasUriChanged = await localImageSyncer(localImgs, instantVars.variables.Token, instantVars.syncedImgs, setSyncedImgs);
-        if (hasUriChanged) {
-            setSyncedImgs([]);
-            await WaitFor(500);
-            await getSyncedImages()
-        }
+        await localImageSyncer(localImgs, instantVars.variables.Token, instantVars.syncedImgs, setSyncedImgs);
         console.log('all tasks completed');
     }
 
@@ -60,7 +57,7 @@ export const VariableProvider = ({ children }) => {
         const images = await fetchSomeImages(instantVars.variables.Token, ids)
         if (images && images.length > 0) {
             await insertMultipleRows(images)
-            setSyncedImgs((prev) => [...prev, ...images]);
+            setSyncedImgs((prev) => [...images, ...prev]);
             instantVars.syncedImgs = [...instantVars.syncedImgs, ...images];
             return images;
         } else {
@@ -72,7 +69,7 @@ export const VariableProvider = ({ children }) => {
     async function getSyncedImages() {
         console.log('fetching synced images from table SyncedPhotos');
         const images = await fetchRows('SyncedPhotos');
-        setSyncedImgs(images);
+        setSyncedImgs(images.reverse());
         instantVars.syncedImgs = images;
         return images;
     }
@@ -108,12 +105,32 @@ export const VariableProvider = ({ children }) => {
         return _variables;
     }
 
+    async function deleteImage(image) {
+        if (await Confirmation('Delete', 'image will be deleted from server too, are you sure?')) {
+            const status = await deleteImg(instantVars.variables.Token, image.id);
+            if (status) {
+                await deleteRow('SyncedPhotos', `id=${image.id}`);
+                await RNFS.unlink(image.uri);
+                if (await RNFS.exists(image.uri)) {
+                    Confirmation('Delete but Failed to delete from phone', 'manually delete from the folder', { proceed: 'ok', abort: '' });
+                }
+                if (await RNFS.exists(RNFS.DocumentDirectoryPath + `/${image.title}`)) {
+                    RNFS.unlink(RNFS.DocumentDirectoryPath + `/${image.title}`);
+                }
+                setSyncedImgs((prev) => [...prev.filter((img) => img.id !== image.id)]);
+            } else {
+                Confirmation('Failed', 'something went wrong on server', { proceed: 'ok', abort: '' });
+            }
+
+        }
+    }
+
     const contextData = {
         variables, setVariables, getVariables,
         localImgs, setLocalImgs,
         syncedImgs, setSyncedImgs,
         folders, setFolders, getFolders, addFolder, removeFolder,
-        performOnlineActions, performOfflineActions
+        performOnlineActions, performOfflineActions, deleteImage
     }
     return (
         <VariableContext.Provider value={contextData}>

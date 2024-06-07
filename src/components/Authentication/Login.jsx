@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import React, { useContext, useState } from 'react'
+import { Text, TextInput, View } from 'react-native'
 import CButton from '../Utility/CButton'
 import { deleteRow, insertRow } from '../Utility/CDatabase';
-import { Confirmation } from '../Utility/Confirmation';
 import { login } from './authentication';
 import VariableContext from '../context/VariableContext';
-import WaitFor from '../Utility/Waiter';
+import { styles } from '../Utility/styles';
 
 export default function Login({ navigation }) {
     const [username, setUsername] = useState('');
@@ -19,14 +18,7 @@ export default function Login({ navigation }) {
         await getVariables()
         setPassword('');
         performOfflineActions();
-    }
-
-    async function logoutHandler() {
-        const status = await Confirmation('Logout', 'are you sure?', { proceed: 'yes', abort: 'no' });
-        if (status) {
-            await deleteRow('Variables', "name='Token'");
-            getVariables();
-        }
+        navigation.goBack();
     }
 
     if (variables.Token) {
@@ -34,7 +26,6 @@ export default function Login({ navigation }) {
             <View style={styles.container} className='bg-gray-800 p-2'>
                 <Text className='text-sky-100 text-xl text-center font-bold'>You are already logged in</Text>
                 <Text className='text-sky-100 text-sm text-center'>clear the app data for logout</Text>
-                {/* <CButton {...{ title: 'logout', onClick: logoutHandler, style: { text: 'bg-sky-900 p-2 m-2 rounded-md text-sky-100 text-xl text-center font-bold' } }} /> */}
             </View>
         );
     }
@@ -57,11 +48,3 @@ export default function Login({ navigation }) {
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center', // Center content vertically
-        // alignItems: 'center', // Center content horizontally
-    },
-});

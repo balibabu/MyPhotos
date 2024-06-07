@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button, Text, View } from 'react-native'
-import CButton from '../components/Utility/CButton'
+import CButton from '../../components/Utility/CButton'
 
 export default function Header() {
     return (

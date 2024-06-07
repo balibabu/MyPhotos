@@ -2,7 +2,7 @@ import RNFS from 'react-native-fs';
 export async function getFiles(path) {
     const result = await RNFS.readDir(RNFS.ExternalStorageDirectoryPath + path);
     // result.sort((a, b) => new Date(b.mtime) - new Date(a.mtime));
-    const files = result.filter((item) => item.isFile());
+    const files = result.filter((item) => item.isFile() && item.name[0] !== '.');
     return files;
 }
 

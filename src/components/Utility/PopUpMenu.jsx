@@ -10,7 +10,7 @@ export default function PopUpMenu(props) {
             <Menu>
                 <MenuTrigger><Text className='text-sky-100 font-bold text-xl px-4 py-2' style={{ height: "100%" }}>{props.triggerText}</Text></MenuTrigger>
                 <MenuOptions>
-                    {props.menus && props.menus.map((menu, index) => <MenuOption key={index} onSelect={menu.click} className='bg-gray-800 border-t border-gray-700 px-4'><Text className='text-gray-100 text-right'>{menu.title}</Text></MenuOption>)}
+                    {props.menus && props.menus.map((menu, index) => <MenuOption key={index} onSelect={menu.click} className='bg-gray-800 border-t border-gray-700 px-4'><Text className='text-gray-100 text-right text-xl'>{menu.title}</Text></MenuOption>)}
                 </MenuOptions>
             </Menu>
         </View>

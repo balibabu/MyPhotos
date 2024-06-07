@@ -17,8 +17,14 @@ export async function uploadImage(token, image) {
             },
             body: formData,
         })
-        return response.json();
+        if (response.ok) {
+            return response.json();
+        } else {
+            console.log(response);
+            return false;
+        }
     } catch (error) {
         console.log(error);
+        return false;
     }
 }

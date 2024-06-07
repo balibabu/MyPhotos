@@ -11,6 +11,7 @@ export default function FolderSelector() {
         try {
             const { uri } = await pickDirectory({ requestLongTermAccess: true });
             const folderPath = getPathFromUri(uri);
+            console.log(folderPath);
             addFolder(folderPath);
         } catch (err) {
             console.log(err)

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Text, View } from 'react-native'
 import { openDatabase } from 'react-native-sqlite-storage';
-import { createTable, deleteRow, fetchRows, insertRow } from '../components/Utility/CDatabase';
+import { createTable, deleteRow, fetchRows, insertRow } from '../../components/Utility/CDatabase';
 
 
 let db = openDatabase({ name: 'UserDatabase.db', location: 'default' });

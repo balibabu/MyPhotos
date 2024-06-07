@@ -1,16 +1,14 @@
 import React, { useContext } from 'react'
 import { Text, TouchableOpacity } from 'react-native'
 import Login from './components/Authentication/Login'
-import Testing from './R&D/Testing'
 import FolderSelector from './components/Photos/FolderSelector'
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { NavigationContainer, useNavigation } from '@react-navigation/native'
 import { MenuProvider } from 'react-native-popup-menu'
 import PopUpMenu from './components/Utility/PopUpMenu'
-import DBManagement from './R&D/DBManagement'
 import FirstScreen from './components/Photos/FirstScreen'
 import VariableContext, { VariableProvider } from './components/context/VariableContext'
-import ViewFullImage from './components/Photos/ViewFullImage'
+import FullScreenImgViewer from './components/ZoomFeature/FullScreenImgViewer'
 
 const Stack = createStackNavigator();
 export default function Home() {
@@ -25,11 +23,9 @@ export default function Home() {
                                 headerRight: () => <RightSideHeader />
                             }}
                         />
-                        <Stack.Screen name="Image" component={ViewFullImage} />
-                        <Stack.Screen name="Testing" component={Testing} />
                         <Stack.Screen name="Login" component={Login} />
                         <Stack.Screen name="Select Folder" component={FolderSelector} />
-                        <Stack.Screen name="DBManagement" component={DBManagement} />
+                        <Stack.Screen name="FullImage" component={FullScreenImgViewer} />
                     </Stack.Navigator>
                 </NavigationContainer>
             </MenuProvider>
