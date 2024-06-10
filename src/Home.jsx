@@ -9,6 +9,7 @@ import PopUpMenu from './components/Utility/PopUpMenu'
 import FirstScreen from './components/Photos/FirstScreen'
 import VariableContext, { VariableProvider } from './components/context/VariableContext'
 import FullScreenImgViewer from './components/ZoomFeature/FullScreenImgViewer'
+import RenderSyncingImgs from './components/Photos/SyncingImages/RenderSyncingImgs';
 
 const Stack = createStackNavigator();
 export default function Home() {
@@ -26,6 +27,7 @@ export default function Home() {
                         <Stack.Screen name="Login" component={Login} />
                         <Stack.Screen name="Select Folder" component={FolderSelector} />
                         <Stack.Screen name="FullImage" component={FullScreenImgViewer} />
+                        <Stack.Screen name="Backup" component={RenderSyncingImgs} />
                     </Stack.Navigator>
                 </NavigationContainer>
             </MenuProvider>
@@ -46,6 +48,7 @@ function RightSideHeader() {
     const menus = [
         { title: 'Select Folder', click: () => navigation.navigate('Select Folder') },
         { title: 'Force Sync', click: () => { performOfflineActions() } },
+        { title: 'Backup', click: () => navigation.navigate('Backup') },
         { title: 'Login', click: () => navigation.navigate('Login') },
     ];
     return (

@@ -4,7 +4,7 @@ import { URI_Updater } from "../context/folderImages";
 import RNFS from 'react-native-fs';
 
 const initiatedTasks = new Set();
-export default async function fullQualityDownloader(image, token, setSyncedImgs, setProgress) {
+export default async function fullQualityDownloader(image, token, setSyncedImgs, setProgress = () => { }) {
     console.log('fullQualityDownloader');
     if (initiatedTasks.has(image.id)) { return }
     initiatedTasks.add(image.id);
@@ -15,6 +15,7 @@ export default async function fullQualityDownloader(image, token, setSyncedImgs,
     const uri = 'file:///' + path;
     await URI_Updater(image.id, uri, 1);
     setSyncedImgs((prev) => prev.map((img) => img.id === image.id ? { ...img, uri, quality: 1 } : img));
+    RNFS.unlink(RNFS.DocumentDirectoryPath + `/${image.title}`);
 }
 
 async function checkDirectory() {

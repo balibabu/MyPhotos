@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { createTable, customSqlExecution, deleteRow, fetchRows, insertRow } from "../Utility/CDatabase";
 import { Confirmation } from "../Utility/Confirmation";
-import { getFiles } from "./getFiles";
+import { getFiles, imagesToUpload } from "./getFiles";
 import askForMediaPermission from "../Utility/MediaPermission";
 import fetchImages, { fetchSomeImages } from "../API/fetchImages";
 import { insertMultipleRows } from "./insertMultipleRows";
@@ -22,6 +22,7 @@ export const VariableProvider = ({ children }) => {
     const [localImgs, setLocalImgs] = useState([]);
     const [folders, setFolders] = useState([]);
     const [syncedImgs, setSyncedImgs] = useState([]);
+    const [syncingImgs, setSyncingImgs] = useState([]);
 
     useEffect(() => { performOfflineActions() }, []);
 
@@ -48,21 +49,32 @@ export const VariableProvider = ({ children }) => {
         await getFolders();
         await WaitFor(2000);
         const localImgs = await getFoldersImages(instantVars.folders);
-        await localImageSyncer(localImgs, instantVars.variables.Token, instantVars.syncedImgs, setSyncedImgs);
+        const images = await imagesToUpload(instantVars.syncedImgs, localImgs, setSyncedImgs);
+        setSyncingImgs(images);
+        await localImageSyncer(images, instantVars.variables.Token, setSyncedImgs, setSyncingImgs);
         console.log('all tasks completed');
     }
 
     async function syncServerImages() {
         const ids = instantVars.syncedImgs.map((img) => img.id);
         const images = await fetchSomeImages(instantVars.variables.Token, ids)
-        if (images && images.length > 0) {
-            await insertMultipleRows(images)
-            setSyncedImgs((prev) => [...images, ...prev]);
-            instantVars.syncedImgs = [...instantVars.syncedImgs, ...images];
-            return images;
+        const imgToAdd = images.add;
+        const imgIdToDelte = images.delete;
+        if (imgToAdd && imgToAdd.length > 0) {
+            await insertMultipleRows(imgToAdd)
+            setSyncedImgs((prev) => [...imgToAdd, ...prev]);
+            instantVars.syncedImgs = [...instantVars.syncedImgs, ...imgToAdd];
         } else {
             console.log('all imgs from server is here');
-            return [];
+        }
+
+        if (imgIdToDelte.length > 0) {
+            if (await Confirmation('Deleted Images', `${imgIdToDelte.length} images have been delete from server. What to do?`, { proceed: 'Delete', abort: 'Leave' })) {
+                for(let id of imgIdToDelte){
+                    const image=instantVars.syncedImgs.find((img)=>img.id===id);
+                    await deleteImage(image);
+                }
+            }
         }
     }
 
@@ -108,20 +120,18 @@ export const VariableProvider = ({ children }) => {
     async function deleteImage(image) {
         if (await Confirmation('Delete', 'image will be deleted from server too, are you sure?')) {
             const status = await deleteImg(instantVars.variables.Token, image.id);
-            if (status) {
-                await deleteRow('SyncedPhotos', `id=${image.id}`);
-                await RNFS.unlink(image.uri);
-                if (await RNFS.exists(image.uri)) {
-                    Confirmation('Delete but Failed to delete from phone', 'manually delete from the folder', { proceed: 'ok', abort: '' });
-                }
-                if (await RNFS.exists(RNFS.DocumentDirectoryPath + `/${image.title}`)) {
-                    RNFS.unlink(RNFS.DocumentDirectoryPath + `/${image.title}`);
-                }
-                setSyncedImgs((prev) => [...prev.filter((img) => img.id !== image.id)]);
-            } else {
+            await deleteRow('SyncedPhotos', `id=${image.id}`);
+            await RNFS.unlink(image.uri);
+            if (await RNFS.exists(image.uri)) {
+                Confirmation('Deleted from server, but Failed to delete from phone', `manually delete it from ${image.uri.slice(image.uri.indexOf('0') + 1)}`, { proceed: 'ok', abort: '' });
+            }
+            if (await RNFS.exists(RNFS.DocumentDirectoryPath + `/${image.title}`)) {
+                RNFS.unlink(RNFS.DocumentDirectoryPath + `/${image.title}`);
+            }
+            setSyncedImgs((prev) => [...prev.filter((img) => img.id !== image.id)]);
+            if (!status) {
                 Confirmation('Failed', 'something went wrong on server', { proceed: 'ok', abort: '' });
             }
-
         }
     }
 
@@ -130,7 +140,8 @@ export const VariableProvider = ({ children }) => {
         localImgs, setLocalImgs,
         syncedImgs, setSyncedImgs,
         folders, setFolders, getFolders, addFolder, removeFolder,
-        performOnlineActions, performOfflineActions, deleteImage
+        performOnlineActions, performOfflineActions, deleteImage,
+        syncingImgs, setSyncingImgs
     }
     return (
         <VariableContext.Provider value={contextData}>

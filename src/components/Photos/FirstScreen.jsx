@@ -6,7 +6,7 @@ import RenderImages from './RenderImages';
 import VariableContext from '../context/VariableContext';
 
 export default function FirstScreen({ navigation }) {
-    const { variables, syncedImgs } = useContext(VariableContext);
+    const { variables, syncedImgs, deleteImage } = useContext(VariableContext);
 
 
     if (!variables.Token) {
@@ -20,7 +20,7 @@ export default function FirstScreen({ navigation }) {
 
     return (
         <View style={{ flex: 1 }} className='bg-gray-950 p-1'>
-            <RenderImages {...{ images: syncedImgs, navigation }} />
+            <RenderImages {...{ images: syncedImgs, navigation, deleteImage }} />
         </View>
     )
 }

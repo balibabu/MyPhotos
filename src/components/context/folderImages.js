@@ -2,6 +2,7 @@ import { uploadImage } from "../API/uploadImage";
 import { customSqlExecution, insertRow } from "../Utility/CDatabase";
 import WaitFor from "../Utility/Waiter";
 import { getFiles } from "./getFiles";
+import RNFS from 'react-native-fs';
 
 export async function getFoldersImages(folders) {
     console.log('fetching folders images');
@@ -14,24 +15,19 @@ export async function getFoldersImages(folders) {
     return images;
 }
 
-export async function localImageSyncer(images, token, syncedImgs, setSyncedImgs) {
+export async function localImageSyncer(images, token, setSyncedImgs, setSyncingImgs) {
     console.log('no of local img to sync =', images.length);
     for (let image of images) {
-        const status = await isFileDuplicate(syncedImgs, image, setSyncedImgs);
-        if (!status) {
-            try {
-                const data = await uploadImage(token, image);
-                if (data) {
-                    const syncedImg = { id: data.id, title: data.title, size: data.size, height: data.height, width: data.width, uri: 'file:///' + image.path, quality: 1 };
-                    await insertRow('SyncedPhotos', syncedImg)
-                    // syncedImgs.push(syncedImg);
-                    setSyncedImgs((prev) => [syncedImg, ...prev]);
-                }
-            } catch (error) {
-                console.log(error);
+        try {
+            const data = await uploadImage(token, image);
+            if (data) {
+                const syncedImg = { id: data.id, title: data.title, size: data.size, height: data.height, width: data.width, uri: 'file:///' + image.path, quality: 1 };
+                await insertRow('SyncedPhotos', syncedImg)
+                setSyncedImgs((prev) => [syncedImg, ...prev]);
+                setSyncingImgs((prev) => [...prev.filter((img) => img.name !== image.name)]);
             }
-        } else {
-            console.log('aborting, duplicate image found', image.name);
+        } catch (error) {
+            console.log(error);
         }
     }
 }
@@ -41,11 +37,12 @@ export async function URI_Updater(id, uri, quality) {
     await customSqlExecution(query);
 }
 
-async function isFileDuplicate(files, file, setSyncedImgs) {  // file is local, files is from table
+export async function isFileDuplicate(files, file, setSyncedImgs) {  // file is local, files is from table
     for (let f of files) {
         if (file.name.trim() === f.title.trim()) {
             const uri = 'file:///' + file.path
             if (f.uri !== uri) {
+                RNFS.unlink(uri)
                 await URI_Updater(f.id, uri, 1);
                 setSyncedImgs((prev) => [...prev.map((img) => img.id === f.id ? { ...img, uri, quality: 1 } : img)]);
             }

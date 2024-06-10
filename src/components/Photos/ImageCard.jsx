@@ -4,7 +4,7 @@ import VariableContext from '../context/VariableContext';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { AddTask } from './Worker';
 
-export default function ImageCard({ item, index, navigation, columnCount }) {
+export default function ImageCard({ item, index, navigation, columnCount, setSelectedImg }) {
     const { variables, setSyncedImgs } = useContext(VariableContext);
     const { width } = Dimensions.get('window');
 
@@ -20,8 +20,13 @@ export default function ImageCard({ item, index, navigation, columnCount }) {
 
 
     return (
-        <TouchableOpacity onPress={() => navigation.navigate('FullImage', { index })}>
-            <View><Image source={item.uri ? { uri: item.uri } : require('../../images/image.jpg')} width={width / columnCount} height={width / columnCount} /></View>
+        <TouchableOpacity onPress={() => navigation.navigate('FullImage', { index })} onLongPress={() => setSelectedImg(item)}>
+            <View width={width / columnCount} height={width / columnCount}>
+                <View style={{margin:'2%'}}>
+                    <Image source={item.uri ? { uri: item.uri } : require('../../images/image.jpg')} width={width / columnCount} style={{ width: '100%', height: '100%' }} />
+                </View>
+            </View>
+            {/* <View><Image source={item.uri ? { uri: item.uri } : require('../../images/image.jpg')} width={width / columnCount} height={width / columnCount} /></View> */}
         </TouchableOpacity>
     );
 

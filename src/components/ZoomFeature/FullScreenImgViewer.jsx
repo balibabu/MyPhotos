@@ -59,7 +59,7 @@ export default function FullScreenImgViewer(props) {
                 const fingers = e.nativeEvent.numberOfPointers;
                 if (fingers > 1) { return }
                 if (lastScale > 1) {
-                    const threshold = 7;
+                    const threshold = 5;
                     const newX = e.nativeEvent.translationX;
                     const newY = e.nativeEvent.translationY;
                     if (Math.abs(newX - oldX) > Math.abs(newY - oldY)) {
@@ -110,15 +110,14 @@ export default function FullScreenImgViewer(props) {
 
     function onDoubleTap() {
         if (lastScale === 1) {
-            setLastScale(1.5);
-        } else if (lastX === 0 && lastY === 0) {
-            setLastScale((prev) => prev >= 4 ? prev : prev * 1.5)
+            setLastScale(2);
+        } else if (lastScale > 1 && lastScale < 4) {
+            setLastScale(4);
+        } else {
+            setLastScale(1)
+            setLastX(0);
+            setLastY(0);
         }
-        else {
-            setLastScale(1);
-        }
-        setLastX(0);
-        setLastY(0);
     }
 
     async function shareImage() {
@@ -138,6 +137,7 @@ export default function FullScreenImgViewer(props) {
 
     return (
         <SafeAreaView style={styles.container}>
+            {progress > 0 && <Text style={styles.centeredText} className='bg-gray-950 p-1 text-gray-500 font-bold text-center'>Downloading full quality image. {progress}% completed</Text>}
             <PanGestureHandler onGestureEvent={handlePan} onHandlerStateChange={gestureStateChangeHandler}>
                 <Animated.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
                     <TapGestureHandler numberOfTaps={2} onActivated={onDoubleTap}>
@@ -156,15 +156,16 @@ export default function FullScreenImgViewer(props) {
             {
                 showDetail &&
                 <View className='bg-gray-950 pl-4 pb-4 pt-2'>
-                    <Text>{image.title}</Text>
-                    <Text>size: {IntelligentSize(image.size)}</Text>
-                    <Text>resolution: {image.width}x{image.height}</Text>
-                    <Text>{image.uri.includes('file:////data/user/') ? 'cloud' : 'local'}</Text>
-                    <CButton {...{ title: 'Share', onClick: shareImage, style: { text: 'bg-green-700 p-2 mr-4 mt-2 rounded-full text-center font-bold' } }} />
-                    <CButton {...{ title: 'Delete', onClick: deleteHandler, style: { text: 'bg-red-700 p-2 mr-4 mt-2 rounded-full text-center font-bold' } }} />
+                    <Text className='text-sky-100'>{image.title}</Text>
+                    <Text className='text-sky-100'>size: {IntelligentSize(image.size)}</Text>
+                    <Text className='text-sky-100'>resolution: {image.width}x{image.height}</Text>
+                    <Text className='text-sky-100'>{image.uri.includes('file:////data/user/') ? 'cloud' : 'exists on device'}</Text>
+                    <View className='flex-row w-full pr-4 mt-2'>
+                        <CButton {...{ title: 'Share', onClick: shareImage, style: { text: 'bg-green-700 p-2 mr-1 rounded-full text-center font-bold  text-sky-100', container: 'flex-grow' } }} />
+                        <CButton {...{ title: 'Delete', onClick: deleteHandler, style: { text: 'bg-red-700 p-2 ml-1 rounded-full text-center font-bold  text-sky-100', container: 'flex-grow' } }} />
+                    </View>
                 </View>
             }
-            {progress > 0 && <Text style={styles.centeredText} className='bg-sky-900 p-1 text-sky-100 font-bold text-center'>Downloading full quality image. {progress}% completed</Text>}
         </SafeAreaView>
     )
 }
@@ -174,11 +175,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     centeredText: {
-        position: 'absolute',
-        top: '90%',
-        // left: '50%',
-        transform: [{ translateY: -50 }],
-        fontSize: 18,
+        // position: 'absolute',
+        // top: '90%',
+        // // left: '50%',
+        // transform: [{ translateY: -50 }],
+        // fontSize: 18,
     },
 });
 

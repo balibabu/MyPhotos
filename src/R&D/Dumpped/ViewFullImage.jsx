@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
-import VariableContext from '../context/VariableContext';
-import ImageCard from './ImageCard';
+import VariableContext from '../../components/context/VariableContext';
+import ImageCard from '../../components/Photos/ImageCard';
 import Swiper from 'react-native-swiper';
-import { API_BASE_URL } from '../API/base_url';
+import { API_BASE_URL } from '../../components/API/base_url';
 import RNFS from 'react-native-fs';
-import DownloadImg from '../Utility/DownloadImg';
-import { URI_Updater } from '../context/folderImages';
+import DownloadImg from '../../components/Utility/DownloadImg';
+import { URI_Updater } from '../../components/context/folderImages';
 
 export default function ViewFullImage(props) {
     const { syncedImgs, variables, setSyncedImgs } = useContext(VariableContext);
