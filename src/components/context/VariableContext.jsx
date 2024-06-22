@@ -32,6 +32,7 @@ export const VariableProvider = ({ children }) => {
         await getSyncedImages();
         await getVariables();
         if (instantVars.variables.Token && await isOnline(instantVars.variables.Token)) {
+            instantVars.isOnline = true;
             setVariables((prev) => ({ ...prev, online: true }));
             await performOnlineActions();
         } else {
@@ -51,7 +52,9 @@ export const VariableProvider = ({ children }) => {
         const localImgs = await getFoldersImages(instantVars.folders);
         const images = await imagesToUpload(instantVars.syncedImgs, localImgs, setSyncedImgs);
         setSyncingImgs(images);
-        await localImageSyncer(images, instantVars.variables.Token, setSyncedImgs, setSyncingImgs);
+        if (instantVars.isOnline) {
+            await localImageSyncer(images, instantVars.variables.Token, setSyncedImgs, setSyncingImgs);
+        }
         console.log('all tasks completed');
     }
 
@@ -60,6 +63,7 @@ export const VariableProvider = ({ children }) => {
         const images = await fetchSomeImages(instantVars.variables.Token, ids)
         const imgToAdd = images.add;
         const imgIdToDelte = images.delete;
+        console.log(images);
         if (imgToAdd && imgToAdd.length > 0) {
             await insertMultipleRows(imgToAdd)
             setSyncedImgs((prev) => [...imgToAdd, ...prev]);
@@ -70,9 +74,11 @@ export const VariableProvider = ({ children }) => {
 
         if (imgIdToDelte.length > 0) {
             if (await Confirmation('Deleted Images', `${imgIdToDelte.length} images have been delete from server. What to do?`, { proceed: 'Delete', abort: 'Leave' })) {
-                for(let id of imgIdToDelte){
-                    const image=instantVars.syncedImgs.find((img)=>img.id===id);
-                    await deleteImage(image);
+                for (let id of imgIdToDelte) {
+                    const image = instantVars.syncedImgs.find((img) => img.id === id);
+                    await deleteRow('SyncedPhotos', `id=${image.id}`);
+                    await RNFS.unlink(image.uri);
+                    setSyncedImgs((prev) => [...prev.filter((img) => img.id !== image.id)]);
                 }
             }
         }

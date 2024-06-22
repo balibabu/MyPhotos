@@ -2,8 +2,9 @@ import React, { useContext, useEffect } from 'react'
 import { FlatList, ToastAndroid, View } from 'react-native';
 import VariableContext from '../../context/VariableContext';
 import ImgCard from './ImgCard';
+import { styles } from '../../Utility/styles';
 
-export default function RenderSyncingImgs(props) {
+export default function RenderSyncingImgs() {
     const { syncingImgs } = useContext(VariableContext);
     const columnCount = 3;
 
@@ -14,11 +15,11 @@ export default function RenderSyncingImgs(props) {
     }, [syncingImgs.length > 0])
 
     return (
-        <View className='p-1'>
+        <View className='p-1 bg-sky-900' style={styles.container}>
             <FlatList
                 data={syncingImgs}
                 renderItem={({ item }) => <ImgCard {...{ image: item, columnCount }} />}
-                keyExtractor={item => item.id}
+                keyExtractor={(_, i) => i}
                 windowSize={columnCount}
                 numColumns={columnCount}
             />

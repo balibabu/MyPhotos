@@ -35,13 +35,12 @@ export default function LongPressModal({ selectedImg, setSelectedImg }) {
     return (
         <Modal visible={selectedImg !== false}
             animationType="slide"
-            transparent={true}
             onRequestClose={() => {
                 setSelectedImg(false);
             }}
         >
 
-            <TouchableOpacity onPress={() => setSelectedImg(false)}>
+            <TouchableOpacity onPress={() => setSelectedImg(false)} activeOpacity={1}>
                 <Image source={{ uri: selectedImg.uri }} style={{ width: '100%', height: '50%' }} />
                 <View className='bg-gray-900 h-full' />
             </TouchableOpacity>

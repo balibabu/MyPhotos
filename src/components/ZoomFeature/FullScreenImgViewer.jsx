@@ -59,16 +59,13 @@ export default function FullScreenImgViewer(props) {
                 const fingers = e.nativeEvent.numberOfPointers;
                 if (fingers > 1) { return }
                 if (lastScale > 1) {
-                    const threshold = 5;
-                    const newX = e.nativeEvent.translationX;
-                    const newY = e.nativeEvent.translationY;
-                    if (Math.abs(newX - oldX) > Math.abs(newY - oldY)) {
-                        if (newX > oldX) { setLastX((prev) => prev + threshold) } else setLastX((prev) => prev - threshold);
-                    } else {
-                        if (newY > oldY) { setLastY((prev) => prev + threshold) } else setLastY((prev) => prev - threshold);
-                    }
-                    oldX = newX;
-                    oldY = newY;
+                    const { velocityX, velocityY } = e.nativeEvent;
+                    const thresV = 200;
+                    let threshold = 5;
+                    if (velocityX > thresV) { setLastX((prev) => prev + threshold) }
+                    if (velocityX < -thresV) { setLastX((prev) => prev - threshold) }
+                    if (velocityY > thresV) { setLastY((prev) => prev + threshold) }
+                    if (velocityY < -thresV) { setLastY((prev) => prev - threshold) }
                 } else {
                     setLastScale(1)
                     setLastX(0)
@@ -82,8 +79,8 @@ export default function FullScreenImgViewer(props) {
     const handleSwipe = (d) => {
         const currentTime = new Date().getTime();
         const { velocityX, velocityY } = d.nativeEvent;
-        const threshold = 1000;
-        if (currentTime - lastSwipeTime > 250) {
+        const threshold = 1200;
+        if (currentTime - lastSwipeTime > 200) {
             if (velocityX > threshold) {
                 props.navigation.navigate('FullImage', { index: props.route.params.index === 0 ? 0 : props.route.params.index - 1 })
             } else if (velocityX < -threshold) {
@@ -156,13 +153,13 @@ export default function FullScreenImgViewer(props) {
             {
                 showDetail &&
                 <View className='bg-gray-950 pl-4 pb-4 pt-2'>
-                    <Text className='text-sky-100'>{image.title}</Text>
+                    <Text className='text-sky-100 font-bold'>{image.title}</Text>
                     <Text className='text-sky-100'>size: {IntelligentSize(image.size)}</Text>
                     <Text className='text-sky-100'>resolution: {image.width}x{image.height}</Text>
-                    <Text className='text-sky-100'>{image.uri.includes('file:////data/user/') ? 'cloud' : 'exists on device'}</Text>
+                    {/* <Text className='text-sky-100'>{image.uri.includes('file:////data/user/') ? 'only exists on cloud' : 'also exists on device'}</Text> */}
                     <View className='flex-row w-full pr-4 mt-2'>
-                        <CButton {...{ title: 'Share', onClick: shareImage, style: { text: 'bg-green-700 p-2 mr-1 rounded-full text-center font-bold  text-sky-100', container: 'flex-grow' } }} />
-                        <CButton {...{ title: 'Delete', onClick: deleteHandler, style: { text: 'bg-red-700 p-2 ml-1 rounded-full text-center font-bold  text-sky-100', container: 'flex-grow' } }} />
+                        <CButton {...{ title: 'Delete', onClick: deleteHandler, style: { text: 'bg-red-700 p-2 mr-1 rounded-full text-center font-bold  text-sky-100', container: 'flex-grow' } }} />
+                        <CButton {...{ title: 'Share', onClick: shareImage, style: { text: 'bg-green-700 p-2 ml-1 rounded-full text-center font-bold  text-sky-100', container: 'flex-grow' } }} />
                     </View>
                 </View>
             }

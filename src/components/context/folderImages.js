@@ -31,6 +31,7 @@ export async function localImageSyncer(images, token, setSyncedImgs, setSyncingI
         }
     }
 }
+
 export async function URI_Updater(id, uri, quality) {
     console.log('URI_Updater', id);
     const query = `UPDATE SyncedPhotos set uri='${uri}', quality=${quality} where id=${id}`;

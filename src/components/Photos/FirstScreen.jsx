@@ -19,7 +19,7 @@ export default function FirstScreen({ navigation }) {
     }
 
     return (
-        <View style={{ flex: 1 }} className='bg-gray-950 p-1'>
+        <View style={{ flex: 1 }} className='bg-gray-900 p-1'>
             <RenderImages {...{ images: syncedImgs, navigation, deleteImage }} />
         </View>
     )
